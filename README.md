@@ -60,6 +60,12 @@ chmod +x test.sh
 
 Pushing to `main` deploys the static site to GitHub Pages through `.github/workflows/pages.yml`.
 
+One-time repository setup is required by a repo admin:
+
+1. Open `Settings > Pages`.
+2. Set the Pages source to `GitHub Actions`.
+3. Re-run the latest `Deploy GitHub Pages` workflow, or push another commit to `main`.
+
 ## Current rules
 
 - One hidden 5-letter word
