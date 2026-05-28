@@ -1,0 +1,73 @@
+# Custom Wordle
+
+A small browser-based Wordle clone with a custom five-letter word list.
+
+The success modal uses `assets/party-captain.gif`.
+
+The guess feedback memes use:
+
+- `assets/meme-miss.svg`
+- `assets/meme-progress.svg`
+- `assets/meme-close.svg`
+
+Regenerate them with:
+
+```bash
+node scripts/generate-meme-assets.js
+```
+
+## Run
+
+Open `index.html` in a browser.
+
+Or run a local server:
+
+```bash
+chmod +x run-local.sh
+./run-local.sh
+```
+
+Then open `http://localhost:8000`.
+
+To use a different port:
+
+```bash
+PORT=3000 ./run-local.sh
+```
+
+## Customize the word list
+
+Edit the `ANSWERS` array in `script.js`. Keep every word lowercase and exactly five letters.
+
+## Debug mode
+
+To inspect the active custom word list, run the app and open:
+
+```text
+http://localhost:8000?debug=1
+```
+
+## Test
+
+Run the basic state tests:
+
+```bash
+chmod +x test.sh
+./test.sh
+```
+
+## Deploy
+
+Pushing to `main` deploys the static site to GitHub Pages through `.github/workflows/pages.yml`.
+
+## Current rules
+
+- One hidden 5-letter word
+- 6 guesses
+- A correct guess shows a `You win` modal and asks whether to play the next word
+- Green means correct letter and position
+- Yellow means correct letter in the wrong position
+- Gray means the letter is not available in the answer
+- Hover or focus a scored letter to see what its color means
+- Non-winning guesses show one of three meme-style messages: no matches, progress, or one-letter-away
+- Physical keyboard and on-screen keyboard are both supported
