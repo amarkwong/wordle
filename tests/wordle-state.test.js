@@ -186,12 +186,25 @@ function setTestWords(harness, words) {
 
   setTestWords(harness, ["about", "agent"]);
   run('answer = "about"');
+  submitGuess(harness, "zzzzz");
+
+  assert.strictEqual(run("guesses.length"), 0, "words outside the full list should not count as guesses");
+  assert.strictEqual(run("currentGuess"), "", "words outside the full list should clear the current guess");
+  assert.strictEqual(elements["#status"].textContent, "zzzzz is not a valid word");
+  assert.match(elements["#status"].className, /error/);
+}
+
+{
+  const harness = createHarness();
+  const { elements, run } = harness;
+
+  setTestWords(harness, ["about", "agent"]);
+  run('answer = "about"');
   submitGuess(harness, "world");
 
-  assert.strictEqual(run("guesses.length"), 0, "words outside the short list should not count as guesses");
-  assert.strictEqual(run("currentGuess"), "", "words outside the short list should clear the current guess");
-  assert.strictEqual(elements["#status"].textContent, "world is not a valid word");
-  assert.match(elements["#status"].className, /error/);
+  assert.strictEqual(run("guesses.length"), 1, "valid full-list words should be accepted even outside the short answer list");
+  assert.deepStrictEqual(runJson(harness, "guesses"), ["world"]);
+  assert.doesNotMatch(elements["#status"].className, /error/);
 }
 
 {

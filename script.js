@@ -1,6 +1,7 @@
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 const FULL_WORDS = window.WORDS;
+const VALID_GUESSES = new Set(FULL_WORDS);
 const SHORTLIST_SIZE = 25;
 
 const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
@@ -65,7 +66,6 @@ let totalScore = 0;
 let lastRoundScore = 0;
 let roundsWon = 0;
 let ANSWERS = [];
-let VALID_GUESSES = new Set();
 
 function startGame() {
   setActiveWords(createShortlist());
@@ -138,7 +138,6 @@ function createShortlist() {
 
 function setActiveWords(words) {
   ANSWERS = [...words];
-  VALID_GUESSES = new Set(ANSWERS);
 }
 
 function beginRoundTimer() {
