@@ -66,6 +66,9 @@ function createHarness(search = "") {
     "#status": createElement(),
     "#meme-feedback": createElement(),
     "#meme-image": createElement(),
+    "#score-total": createElement(),
+    "#last-score": createElement(),
+    "#rounds-won": createElement(),
     "#new-game": createElement(),
     "#debug-panel": createElement(),
     "#word-list": createElement(),
@@ -143,6 +146,9 @@ function runJson(harness, expression) {
   assert.strictEqual(boardTiles(elements).length, 30, "board should render 30 tiles");
   assert.strictEqual(elements["#keyboard"].children.length, 3, "keyboard should render three rows");
   assert.strictEqual(elements["#meme-feedback"].hidden, true, "meme feedback should start hidden");
+  assert.strictEqual(elements["#score-total"].textContent, "0", "score should start at zero");
+  assert.strictEqual(elements["#last-score"].textContent, "0", "last score should start at zero");
+  assert.strictEqual(elements["#rounds-won"].textContent, "0", "wins should start at zero");
   assert.match(elements["#status"].textContent, /5-letter word in 6 tries/);
 }
 
@@ -248,8 +254,11 @@ function runJson(harness, expression) {
   assert.strictEqual(elements["#congrats-modal"].hidden, false, "win should show the congrats modal");
   assert.strictEqual(run("answer"), "about", "win should not immediately advance to the next target");
   assert.strictEqual(run("gameOver"), true, "game should pause while the win modal is shown");
-  assert.match(elements["#status"].textContent, /Correct in 1\/6/);
+  assert.match(elements["#status"].textContent, /Correct in 1\/6\. \+6 score\./);
   assert.match(elements["#congrats-message"].textContent, /Would you like to play the next one\?/);
+  assert.strictEqual(elements["#score-total"].textContent, "6", "solving on the first guess should add six points");
+  assert.strictEqual(elements["#last-score"].textContent, "6");
+  assert.strictEqual(elements["#rounds-won"].textContent, "1");
   assert.ok(elements["#congrats-modal"].modal.focusCalled, "win modal should receive focus");
 
   const firstTile = firstRow.children[0];
@@ -263,6 +272,35 @@ function runJson(harness, expression) {
   assert.strictEqual(run("guesses.length"), 0, "next round should clear previous guesses");
   assert.strictEqual(boardTiles(elements).every((tile) => tile.textContent === ""), true, "next round should clear the board");
   assert.strictEqual(elements["#meme-feedback"].hidden, true, "next round should hide meme feedback");
+  assert.strictEqual(elements["#score-total"].textContent, "6", "next round should keep the running score");
+}
+
+{
+  const harness = createHarness();
+  const { elements, run } = harness;
+
+  run('answer = "world"');
+  submitGuess(harness, "agent");
+  submitGuess(harness, "alert");
+  submitGuess(harness, "world");
+
+  assert.strictEqual(run("calculateRoundScore(3)"), 4, "score should be six minus incorrect guesses");
+  assert.strictEqual(elements["#score-total"].textContent, "4", "third-guess solve should add four points");
+  assert.strictEqual(elements["#last-score"].textContent, "4");
+  assert.strictEqual(elements["#rounds-won"].textContent, "1");
+
+  run("startNextRound(); answer = 'about';");
+  submitGuess(harness, "about");
+
+  assert.strictEqual(elements["#score-total"].textContent, "10", "score should accumulate across continued rounds");
+  assert.strictEqual(elements["#last-score"].textContent, "6");
+  assert.strictEqual(elements["#rounds-won"].textContent, "2");
+
+  run("startGame()");
+
+  assert.strictEqual(elements["#score-total"].textContent, "0", "fresh game reset should clear total score");
+  assert.strictEqual(elements["#last-score"].textContent, "0");
+  assert.strictEqual(elements["#rounds-won"].textContent, "0");
 }
 
 {

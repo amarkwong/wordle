@@ -82,6 +82,9 @@ const keyboard = document.querySelector("#keyboard");
 const status = document.querySelector("#status");
 const memeFeedback = document.querySelector("#meme-feedback");
 const memeImage = document.querySelector("#meme-image");
+const scoreTotalDisplay = document.querySelector("#score-total");
+const lastScoreDisplay = document.querySelector("#last-score");
+const roundsWonDisplay = document.querySelector("#rounds-won");
 const newGameButton = document.querySelector("#new-game");
 const debugPanel = document.querySelector("#debug-panel");
 const wordList = document.querySelector("#word-list");
@@ -105,6 +108,9 @@ let pendingAnswer = "";
 let hardMode = false;
 let timerId = null;
 let timeLeft = TIME_LIMIT;
+let totalScore = 0;
+let lastRoundScore = 0;
+let roundsWon = 0;
 
 function startGame() {
   answer = pickAnswer();
@@ -112,6 +118,7 @@ function startGame() {
   currentGuess = "";
   gameOver = false;
   pendingAnswer = "";
+  resetScore();
   hideCongratsModal();
   hideMemeFeedback();
   renderBoard();
@@ -132,6 +139,32 @@ function startNextRound() {
   renderKeyboard();
   beginRoundTimer();
   setStatus("Guess the 5-letter word in 6 tries.");
+}
+
+function resetScore() {
+  totalScore = 0;
+  lastRoundScore = 0;
+  roundsWon = 0;
+  renderScorePanel();
+}
+
+function addRoundScore(guessCount) {
+  lastRoundScore = calculateRoundScore(guessCount);
+  totalScore += lastRoundScore;
+  roundsWon += 1;
+  renderScorePanel();
+  return lastRoundScore;
+}
+
+function calculateRoundScore(guessCount) {
+  const incorrectGuesses = guessCount - 1;
+  return MAX_GUESSES - incorrectGuesses;
+}
+
+function renderScorePanel() {
+  scoreTotalDisplay.textContent = String(totalScore);
+  lastScoreDisplay.textContent = String(lastRoundScore);
+  roundsWonDisplay.textContent = String(roundsWon);
 }
 
 function beginRoundTimer() {
@@ -244,10 +277,10 @@ function renderBoard() {
   }
 }
 
-function showCongratsModal(solvedWord, guessCount) {
+function showCongratsModal(solvedWord, guessCount, roundScore) {
   pendingAnswer = pickAnswer(solvedWord);
   gameOver = true;
-  congratsMessage.textContent = `You found ${solvedWord.toUpperCase()} in ${guessCount}/${MAX_GUESSES}. Would you like to play the next one?`;
+  congratsMessage.textContent = `You found ${solvedWord.toUpperCase()} in ${guessCount}/${MAX_GUESSES} for ${roundScore} points. Would you like to play the next one?`;
   congratsModal.hidden = false;
   congratsDialog.focus();
 }
@@ -411,12 +444,13 @@ function submitGuess() {
   if (submittedGuess === answer) {
     const solvedWord = answer;
     const guessCount = guesses.length;
+    const roundScore = addRoundScore(guessCount);
     currentGuess = "";
     stopTimer();
     renderBoard();
     renderKeyboard();
-    setStatus(`Correct in ${guessCount}/${MAX_GUESSES}.`, "win");
-    showCongratsModal(solvedWord, guessCount);
+    setStatus(`Correct in ${guessCount}/${MAX_GUESSES}. +${roundScore} score.`, "win");
+    showCongratsModal(solvedWord, guessCount, roundScore);
     return;
   } else if (guesses.length === MAX_GUESSES) {
     const feedback = getFeedback(submittedScore);

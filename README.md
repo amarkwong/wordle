@@ -71,6 +71,9 @@ One-time repository setup is required by a repo admin:
 - One hidden 5-letter word
 - 6 guesses
 - A correct guess shows a `You win` modal and asks whether to play the next word
+- Winning score is `6 - incorrect guesses`
+- Continuing to the next word keeps adding to the running score
+- Starting a fresh game with reset clears the score
 - Green means correct letter and position
 - Yellow means correct letter in the wrong position
 - Gray means the letter is not available in the answer
