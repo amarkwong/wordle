@@ -37,8 +37,13 @@ PORT=3000 ./run-local.sh
 
 ## Customize the word list
 
-Edit the `ANSWERS` array in `script.js`. Keep every word lowercase and exactly five letters.
-Target words are picked from this list, but player guesses do not have to be in the list.
+Edit `assets/words.txt`, then regenerate `words.js`:
+
+```bash
+node scripts/generate-words.js
+```
+
+Target words and valid guesses both come from this list. Invalid guesses clear the current row without costing a try.
 
 ## Debug mode
 

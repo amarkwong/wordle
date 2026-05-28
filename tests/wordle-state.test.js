@@ -3,6 +3,10 @@ const vm = require("vm");
 const assert = require("assert");
 
 assert.ok(fs.existsSync("assets/party-captain.gif"), "success GIF asset should exist locally");
+const wordList = fs.readFileSync("assets/words.txt", "utf8").trim().split(/\s+/);
+assert.strictEqual(wordList.length, 5757, "SGB word list should have 5,757 words");
+assert.strictEqual(wordList[0], "which", "word list should start with the requested first word");
+assert.strictEqual(wordList.at(-1), "pupal", "word list should end with the requested final word");
 ["assets/meme-miss.svg", "assets/meme-progress.svg", "assets/meme-close.svg"].forEach((asset) => {
   assert.ok(fs.existsSync(asset), `${asset} should exist locally`);
   assert.match(fs.readFileSync(asset, "utf8"), /href="data:image\/jpeg;base64,/, `${asset} should embed its source JPG`);
@@ -108,6 +112,7 @@ function createHarness(search = "") {
   };
 
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync("words.js", "utf8"), context);
   vm.runInContext(fs.readFileSync("script.js", "utf8"), context);
 
   return {
@@ -174,10 +179,10 @@ function runJson(harness, expression) {
   run('answer = "world"');
   submitGuess(harness, "zzzzz");
 
-  assert.strictEqual(run("guesses.length"), 1, "five-letter guesses outside the target list should still count");
-  assert.strictEqual(elements["#status"].textContent, "Not even close. The word remains undefeated. 5 guesses left.");
-  assert.strictEqual(elements["#meme-image"].src, "assets/meme-miss.svg");
-  assert.doesNotMatch(elements["#status"].className, /error/);
+  assert.strictEqual(run("guesses.length"), 0, "invalid words should not count as guesses");
+  assert.strictEqual(run("currentGuess"), "", "invalid words should clear the current guess");
+  assert.strictEqual(elements["#status"].textContent, "zzzzz is not a valid word");
+  assert.match(elements["#status"].className, /error/);
 }
 
 {
@@ -325,7 +330,7 @@ function runJson(harness, expression) {
   assert.strictEqual(elements["#debug-panel"].hidden, false, "debug mode should reveal the word list");
   assert.strictEqual(elements["#word-count"].textContent, `${run("ANSWERS.length")} words`);
   assert.strictEqual(elements["#word-list"].children.length, run("ANSWERS.length"));
-  assert.strictEqual(elements["#word-list"].children[0].textContent, "about", "debug words should render sorted");
+  assert.strictEqual(elements["#word-list"].children[0].textContent, "aargh", "debug words should render sorted");
 }
 
 {

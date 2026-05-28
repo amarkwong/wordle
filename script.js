@@ -1,53 +1,7 @@
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
-
-const ANSWERS = [
-  "about",
-  "agent",
-  "alert",
-  "audio",
-  "beach",
-  "brain",
-  "chair",
-  "cloud",
-  "crane",
-  "dance",
-  "delta",
-  "dream",
-  "earth",
-  "field",
-  "flame",
-  "focus",
-  "frame",
-  "green",
-  "heart",
-  "house",
-  "input",
-  "light",
-  "logic",
-  "model",
-  "night",
-  "ocean",
-  "plant",
-  "prime",
-  "quiet",
-  "river",
-  "scale",
-  "scope",
-  "share",
-  "smart",
-  "sound",
-  "spark",
-  "stone",
-  "table",
-  "think",
-  "trace",
-  "train",
-  "trust",
-  "value",
-  "water",
-  "world",
-];
+const ANSWERS = window.WORDS;
+const VALID_GUESSES = new Set(ANSWERS);
 
 const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 const KEY_RANK = { absent: 1, present: 2, correct: 3 };
@@ -431,6 +385,15 @@ function submitGuess() {
   if (!/^[a-z]{5}$/.test(currentGuess)) {
     setStatus("Use five letters only.", "error");
     hideMemeFeedback();
+    return;
+  }
+
+  if (!VALID_GUESSES.has(currentGuess)) {
+    const invalidGuess = currentGuess;
+    currentGuess = "";
+    setStatus(`${invalidGuess} is not a valid word`, "error");
+    hideMemeFeedback();
+    renderBoard();
     return;
   }
 
