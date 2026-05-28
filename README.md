@@ -43,11 +43,11 @@ Edit `assets/words.txt`, then regenerate `words.js`:
 node scripts/generate-words.js
 ```
 
-Target words and valid guesses both come from this list. Invalid guesses clear the current row without costing a try.
+Each fresh game randomly picks a 25-word short list from the full list. Target words and valid guesses both come from the active short list. Invalid guesses clear the current row without costing a try.
 
 ## Debug mode
 
-To inspect the active custom word list, run the app and open:
+To inspect the active 25-word short list, run the app and open:
 
 ```text
 http://localhost:8000?debug=1

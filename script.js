@@ -1,7 +1,7 @@
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
-const ANSWERS = window.WORDS;
-const VALID_GUESSES = new Set(ANSWERS);
+const FULL_WORDS = window.WORDS;
+const SHORTLIST_SIZE = 25;
 
 const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 const KEY_RANK = { absent: 1, present: 2, correct: 3 };
@@ -64,8 +64,11 @@ let timeLeft = TIME_LIMIT;
 let totalScore = 0;
 let lastRoundScore = 0;
 let roundsWon = 0;
+let ANSWERS = [];
+let VALID_GUESSES = new Set();
 
 function startGame() {
+  setActiveWords(createShortlist());
   answer = pickAnswer();
   guesses = [];
   currentGuess = "";
@@ -74,6 +77,7 @@ function startGame() {
   resetScore();
   hideCongratsModal();
   hideMemeFeedback();
+  renderDebugPanel();
   renderBoard();
   renderKeyboard();
   beginRoundTimer();
@@ -88,6 +92,7 @@ function startNextRound() {
   pendingAnswer = "";
   hideCongratsModal();
   hideMemeFeedback();
+  renderDebugPanel();
   renderBoard();
   renderKeyboard();
   beginRoundTimer();
@@ -118,6 +123,22 @@ function renderScorePanel() {
   scoreTotalDisplay.textContent = String(totalScore);
   lastScoreDisplay.textContent = String(lastRoundScore);
   roundsWonDisplay.textContent = String(roundsWon);
+}
+
+function createShortlist() {
+  const shuffledWords = [...FULL_WORDS];
+
+  for (let index = shuffledWords.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledWords[index], shuffledWords[randomIndex]] = [shuffledWords[randomIndex], shuffledWords[index]];
+  }
+
+  return shuffledWords.slice(0, SHORTLIST_SIZE);
+}
+
+function setActiveWords(words) {
+  ANSWERS = [...words];
+  VALID_GUESSES = new Set(ANSWERS);
 }
 
 function beginRoundTimer() {
@@ -191,7 +212,7 @@ function renderDebugPanel() {
   if (!debugMode) return;
 
   debugPanel.hidden = false;
-  wordCount.textContent = `${ANSWERS.length} words`;
+  wordCount.textContent = `${ANSWERS.length} active words`;
   wordList.innerHTML = "";
 
   [...ANSWERS].sort().forEach((word) => {
@@ -467,5 +488,4 @@ hardToggle.addEventListener("change", () => {
   }
 });
 
-renderDebugPanel();
 startGame();

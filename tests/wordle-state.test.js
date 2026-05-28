@@ -141,12 +141,19 @@ function runJson(harness, expression) {
   return JSON.parse(harness.run(`JSON.stringify(${expression})`));
 }
 
+function setTestWords(harness, words) {
+  harness.run(`setActiveWords(${JSON.stringify(words)})`);
+}
+
 {
   const harness = createHarness();
   const { elements, run } = harness;
 
   assert.strictEqual(run("WORD_LENGTH"), 5, "game should use five-letter words");
   assert.strictEqual(run("MAX_GUESSES"), 6, "game should allow six standard guesses");
+  assert.strictEqual(run("FULL_WORDS.length"), 5757, "full word source should keep the requested word list");
+  assert.strictEqual(run("SHORTLIST_SIZE"), 25, "fresh games should use a short active word list");
+  assert.strictEqual(run("ANSWERS.length"), 25, "active guesses should come from the short list");
   assert.strictEqual(boardRows(elements).length, 6, "board should render six rows");
   assert.strictEqual(boardTiles(elements).length, 30, "board should render 30 tiles");
   assert.strictEqual(elements["#keyboard"].children.length, 3, "keyboard should render three rows");
@@ -161,6 +168,7 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
+  setTestWords(harness, ["about"]);
   run('["a", "b", "o", "u", "t", "z"].forEach(handleInput);');
   assert.strictEqual(run("currentGuess"), "about", "typing should stop at five letters");
 
@@ -176,12 +184,13 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
-  run('answer = "world"');
-  submitGuess(harness, "zzzzz");
+  setTestWords(harness, ["about", "agent"]);
+  run('answer = "about"');
+  submitGuess(harness, "world");
 
-  assert.strictEqual(run("guesses.length"), 0, "invalid words should not count as guesses");
-  assert.strictEqual(run("currentGuess"), "", "invalid words should clear the current guess");
-  assert.strictEqual(elements["#status"].textContent, "zzzzz is not a valid word");
+  assert.strictEqual(run("guesses.length"), 0, "words outside the short list should not count as guesses");
+  assert.strictEqual(run("currentGuess"), "", "words outside the short list should clear the current guess");
+  assert.strictEqual(elements["#status"].textContent, "world is not a valid word");
   assert.match(elements["#status"].className, /error/);
 }
 
@@ -189,6 +198,7 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
+  setTestWords(harness, ["about", "world"]);
   run('answer = "world"');
   submitGuess(harness, "about");
 
@@ -250,6 +260,7 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
+  setTestWords(harness, ["about", "world"]);
   run('answer = "about"');
   submitGuess(harness, "about");
 
@@ -285,6 +296,7 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
+  setTestWords(harness, ["agent", "alert", "world", "about"]);
   run('answer = "world"');
   submitGuess(harness, "agent");
   submitGuess(harness, "alert");
@@ -314,6 +326,7 @@ function runJson(harness, expression) {
   const { elements, run } = harness;
   const wrongGuesses = ["agent", "alert", "audio", "beach", "brain", "chair"];
 
+  setTestWords(harness, ["world", ...wrongGuesses]);
   run('answer = "world"');
   wrongGuesses.forEach((guess) => submitGuess(harness, guess));
 
@@ -328,9 +341,13 @@ function runJson(harness, expression) {
   const { elements, run } = harness;
 
   assert.strictEqual(elements["#debug-panel"].hidden, false, "debug mode should reveal the word list");
-  assert.strictEqual(elements["#word-count"].textContent, `${run("ANSWERS.length")} words`);
-  assert.strictEqual(elements["#word-list"].children.length, run("ANSWERS.length"));
-  assert.strictEqual(elements["#word-list"].children[0].textContent, "aargh", "debug words should render sorted");
+  assert.strictEqual(elements["#word-count"].textContent, "25 active words");
+  assert.strictEqual(elements["#word-list"].children.length, 25);
+  assert.deepStrictEqual(
+    elements["#word-list"].children.map((child) => child.textContent),
+    runJson(harness, "[...ANSWERS].sort()"),
+    "debug mode should show the current short list sorted"
+  );
 }
 
 {
@@ -370,6 +387,7 @@ function runJson(harness, expression) {
   const harness = createHarness();
   const { elements, run } = harness;
 
+  setTestWords(harness, ["about", "world"]);
   run('answer = "world"; hardMode = true; startTimer();');
   run("for (let i = 0; i < 10; i += 1) tickTimer();");
 
@@ -388,6 +406,7 @@ function runJson(harness, expression) {
   run("hardMode = true; startGame();");
   assert.strictEqual(elements["#hard-toggle"].disabled, false, "toggle should be armed on a fresh round");
 
+  setTestWords(harness, ["about", "world"]);
   run('answer = "world"');
   submitGuess(harness, "about");
 
