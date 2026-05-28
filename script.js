@@ -49,7 +49,6 @@ const ANSWERS = [
   "world",
 ];
 
-const VALID_GUESSES = new Set(ANSWERS);
 const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 const KEY_RANK = { absent: 1, present: 2, correct: 3 };
 const STATE_LABELS = {
@@ -429,8 +428,8 @@ function submitGuess() {
     return;
   }
 
-  if (!VALID_GUESSES.has(currentGuess)) {
-    setStatus("That word is not in the custom list.", "error");
+  if (!/^[a-z]{5}$/.test(currentGuess)) {
+    setStatus("Use five letters only.", "error");
     hideMemeFeedback();
     return;
   }

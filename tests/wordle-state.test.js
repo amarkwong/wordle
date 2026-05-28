@@ -174,9 +174,10 @@ function runJson(harness, expression) {
   run('answer = "world"');
   submitGuess(harness, "zzzzz");
 
-  assert.strictEqual(run("guesses.length"), 0, "words outside the custom list should not count as guesses");
-  assert.strictEqual(elements["#status"].textContent, "That word is not in the custom list.");
-  assert.match(elements["#status"].className, /error/);
+  assert.strictEqual(run("guesses.length"), 1, "five-letter guesses outside the target list should still count");
+  assert.strictEqual(elements["#status"].textContent, "Not even close. The word remains undefeated. 5 guesses left.");
+  assert.strictEqual(elements["#meme-image"].src, "assets/meme-miss.svg");
+  assert.doesNotMatch(elements["#status"].className, /error/);
 }
 
 {
